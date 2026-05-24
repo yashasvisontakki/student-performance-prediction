@@ -1,0 +1,150 @@
+{% extends "predictor/base.html" %}
+{% block title %}Results – Student Performance{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+  <!-- ── Prediction Summary ── -->
+  <div class="glass-card p-4 mb-4">
+    <h5 class="section-title"><i class="bi bi-lightning-charge me-2"></i>Prediction Summary</h5>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="p-4 rounded-4" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);">
+          <p class="text-secondary mb-2">Predicted Output</p>
+          <div class="display-5 fw-bold mb-3
+            {% if final_label == 'High' %}text-success
+            {% elif final_label == 'Medium' %}text-warning
+            {% else %}text-danger{% endif %}">
+            {{ final_label }}
+          </div>
+          {% if final_label == 'High' %}
+            <p class="mb-0 text-success">Excellent habits detected. Keep it going!</p>
+          {% elif final_label == 'Medium' %}
+            <p class="mb-0 text-warning">Good progress. A few improvements can raise your performance.</p>
+          {% else %}
+            <p class="mb-0 text-danger">Work on study routine, sleep and stress management.</p>
+          {% endif %}
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="p-4 rounded-4" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);">
+          <p class="text-secondary mb-2">Best Performing Algorithm</p>
+          <div class="h4 fw-bold text-warning mb-2">{{ best_model }}</div>
+          {% if best_model_accuracy %}
+            <span class="badge bg-success fs-6">Accuracy: {{ best_model_accuracy }}%</span>
+          {% else %}
+            <span class="badge bg-secondary fs-6">Accuracy data unavailable</span>
+          {% endif %}
+          <p class="mt-3 mb-0 text-secondary">This algorithm produced the most reliable result for your input.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Model Accuracy Comparison ── -->
+  <div class="glass-card p-4 mb-4">
+    <h5 class="section-title"><i class="bi bi-bar-chart me-2"></i>Accuracy of Each Algorithm</h5>
+    <div class="row g-3">
+      {% for model_name, info in predictions.items %}
+      <div class="col-md-4">
+        <div class="p-3 rounded-3" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <strong style="font-size:.95rem;">{{ model_name }}</strong>
+            {% if model_name == best_model %}
+              <span class="badge bg-warning text-dark">⭐ Best</span>
+            {% endif %}
+          </div>
+
+          <span class="badge mb-2
+            {% if info.label == 'High' %}bg-success
+            {% elif info.label == 'Medium' %}bg-warning text-dark
+            {% else %}bg-danger{% endif %}">
+            Predicted: {{ info.label }}
+          </span>
+
+          <div class="d-flex align-items-center gap-2">
+            <div class="progress flex-grow-1" style="height:10px; background:rgba(255,255,255,0.1);">
+              <div class="progress-bar
+                {% if info.accuracy >= 80 %}bg-success
+                {% elif info.accuracy >= 60 %}bg-warning
+                {% else %}bg-danger{% endif %}
+                style="width:{{ info.accuracy }}%;" role="progressbar">
+              </div>
+            </div>
+            <span class="fw-bold text-warning" style="min-width:52px;">{{ info.accuracy }}%</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ── Input Summary ── -->
+  <div class="glass-card p-4 mb-4">
+    <h5 class="section-title"><i class="bi bi-clipboard-data me-2"></i>Your Input Summary</h5>
+    <div class="row g-2">
+      {% for key, value in input_data.items %}
+      <div class="col-md-4 col-6">
+        <div class="d-flex justify-content-between px-3 py-2 rounded-3"
+             style="background:rgba(255,255,255,0.05);">
+          <span class="text-secondary small">{{ key }}</span>
+          <strong class="text-warning">{{ value }}</strong>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ── Actionable Tips ── -->
+  <div class="glass-card p-4 mb-4">
+    <h5 class="section-title"><i class="bi bi-lightbulb me-2"></i>Tips to Improve</h5>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="p-3 rounded-3 text-center" style="background:rgba(255,255,255,0.05);">
+          <div class="fs-2">📚</div>
+          <strong>Study More</strong>
+          <p class="small text-secondary mt-1 mb-0">Aim for 6–8 hours of focused study daily.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="p-3 rounded-3 text-center" style="background:rgba(255,255,255,0.05);">
+          <div class="fs-2">😴</div>
+          <strong>Sleep Well</strong>
+          <p class="small text-secondary mt-1 mb-0">7–9 hours of sleep boosts memory retention.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="p-3 rounded-3 text-center" style="background:rgba(255,255,255,0.05);">
+          <div class="fs-2">📱</div>
+          <strong>Reduce Screen Time</strong>
+          <p class="small text-secondary mt-1 mb-0">Limit social media to under 2 hrs/day.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Action Buttons ── -->
+  <div class="text-center mt-4 d-flex justify-content-center gap-3">
+    <a href="{% url 'predict' %}" class="btn btn-primary btn-lg px-4">
+      <i class="bi bi-arrow-repeat me-2"></i>Predict Again
+    </a>
+    <a href="{% url 'history' %}" class="btn btn-outline-warning btn-lg px-4">
+      <i class="bi bi-clock-history me-2"></i>View History
+    </a>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Animate progress bars on load
+  document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".progress-bar").forEach(function(bar) {
+      const w = bar.style.width;
+      bar.style.width = "0%";
+      setTimeout(() => { bar.style.transition = "width 1s ease"; bar.style.width = w; }, 200);
+    });
+  });
+</script>
+{% endblock %}

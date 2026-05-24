@@ -1,0 +1,160 @@
+{% extends "predictor/base.html" %}
+{% block title %}Predict – Student Performance{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+  <!-- Page Header -->
+  <div class="text-center mb-5">
+    <h1 class="fw-bold text-warning display-5">🎓 Student Performance Predictor</h1>
+    <p class="text-secondary fs-5">Fill in the daily habit details to predict academic performance level</p>
+  </div>
+
+  {% if not models_ready %}
+    <div class="alert alert-danger text-center fs-5">
+      ⚠️  ML models not trained yet.<br>
+      <strong>Open your terminal and run:</strong>
+      <code class="ms-2">python train_models.py</code>
+      <br>Then refresh this page.
+    </div>
+  {% else %}
+
+  <form method="POST" action="{% url 'predict' %}">
+    {% csrf_token %}
+
+    <!-- ── Row 1: Study & Sleep ── -->
+    <div class="glass-card p-4 mb-4">
+      <h5 class="section-title"><i class="bi bi-book me-2"></i>Study & Rest</h5>
+      <div class="row g-3">
+
+        <div class="col-md-6">
+          <label class="form-label">📚 Study Hours per Day</label>
+          <input type="number" name="study_hours" class="form-control"
+                 min="0" max="24" step="0.5" placeholder="e.g. 5" required>
+          <div class="form-text text-secondary">How many hours do you study daily?</div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">😴 Sleep Hours per Night</label>
+          <input type="number" name="sleep_hours" class="form-control"
+                 min="0" max="24" step="0.5" placeholder="e.g. 7" required>
+          <div class="form-text text-secondary">Average sleep per night</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Row 2: Screen & Social Media ── -->
+    <div class="glass-card p-4 mb-4">
+      <h5 class="section-title"><i class="bi bi-phone me-2"></i>Screen & Social Media</h5>
+      <div class="row g-3">
+
+        <div class="col-md-6">
+          <label class="form-label">📱 Social Media Usage (hrs/day)</label>
+          <input type="number" name="social_media_usage" class="form-control"
+                 min="0" max="24" step="0.5" placeholder="e.g. 2" required>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">🖥️ Total Screen Time (hrs/day)</label>
+          <input type="number" name="screen_time" class="form-control"
+                 min="0" max="24" step="0.5" placeholder="e.g. 6" required>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Row 3: Health & Fitness ── -->
+    <div class="glass-card p-4 mb-4">
+      <h5 class="section-title"><i class="bi bi-heart-pulse me-2"></i>Health & Fitness</h5>
+      <div class="row g-3">
+
+        <div class="col-md-4">
+          <label class="form-label">🥗 Diet Quality (1 = Poor, 5 = Excellent)</label>
+          <select name="diet_quality" class="form-select" required>
+            <option value="" disabled selected>Select quality</option>
+            <option value="1">1 – Poor</option>
+            <option value="2">2 – Below Average</option>
+            <option value="3">3 – Average</option>
+            <option value="4">4 – Good</option>
+            <option value="5">5 – Excellent</option>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">🧠 Mental Health Rating (1–10)</label>
+          <input type="number" name="mental_health" class="form-control"
+                 min="1" max="10" step="1" placeholder="e.g. 7" required>
+          <div class="form-text text-secondary">10 = Very good mental health</div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">🏃 Physical Activity (hrs/week)</label>
+          <input type="number" name="physical_activity" class="form-control"
+                 min="0" max="40" step="0.5" placeholder="e.g. 3" required>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Row 4: Academic & Stress ── -->
+    <div class="glass-card p-4 mb-4">
+      <h5 class="section-title"><i class="bi bi-mortarboard me-2"></i>Academic & Stress</h5>
+      <div class="row g-3">
+
+        <div class="col-md-4">
+          <label class="form-label">📅 Attendance (%)</label>
+          <input type="number" name="attendance" class="form-control"
+                 min="0" max="100" step="1" placeholder="e.g. 85" required>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">😰 Stress Level (1–10)</label>
+          <input type="number" name="stress_level" class="form-control"
+                 min="1" max="10" step="1" placeholder="e.g. 5" required>
+          <div class="form-text text-secondary">10 = Extremely stressed</div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">🕐 Time Management Score (1–10)</label>
+          <input type="number" name="time_management" class="form-control"
+                 min="1" max="10" step="0.5" placeholder="e.g. 7" required>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Row 5: Internet & Extra Activities ── -->
+    <div class="glass-card p-4 mb-4">
+      <h5 class="section-title"><i class="bi bi-wifi me-2"></i>Internet & Activities</h5>
+      <div class="row g-3">
+
+        <div class="col-md-6">
+          <label class="form-label">🌐 Internet Usage (hrs/day)</label>
+          <input type="number" name="internet_usage" class="form-control"
+                 min="0" max="24" step="0.5" placeholder="e.g. 4" required>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">🎭 Extra-Curricular Activities</label>
+          <select name="extra_curricular" class="form-select" required>
+            <option value="" disabled selected>Select</option>
+            <option value="1">Yes – I participate</option>
+            <option value="0">No – I don't participate</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Submit ── -->
+    <div class="text-center mt-4">
+      <button type="submit" class="btn btn-primary btn-lg px-5 py-3 fs-5">
+        <i class="bi bi-cpu me-2"></i>Predict My Performance
+      </button>
+    </div>
+
+  </form>
+  {% endif %}
+</div>
+{% endblock %}
